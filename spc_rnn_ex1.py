@@ -7,6 +7,7 @@ import numpy as np
 from tensorflow.models.rnn import rnn_cell
 from tensorflow.models.rnn import rnn
 
+import random
 import sys
 
 
@@ -18,6 +19,9 @@ def read_lines(path):
 
 def main(argv):
 
+    random.seed(1)
+    np.random.seed(1)
+
     batch_size = 1
     num_steps = 10
     hidden_size = 8
@@ -27,8 +31,7 @@ def main(argv):
     _input_data = tf.placeholder(tf.int32, [batch_size, num_steps])
     _targets = tf.placeholder(tf.int32, [batch_size])
 
-    lstm_cell = rnn_cell.BasicLSTMCell(hidden_size, forget_bias=0.0)
-    cell = lstm_cell
+    cell = rnn_cell.BasicLSTMCell(hidden_size, forget_bias=0.0)
 
     _initial_state = cell.zero_state(batch_size, tf.float32)
 
@@ -51,15 +54,16 @@ def main(argv):
 
     y = tf.nn.sigmoid(tf.matmul(last_output, W) + b)
 
-
     init = tf.initialize_all_variables()
 
     with tf.Session() as sess:
         sess.run(init)
 
         input_feed = {
-            _input_data: np.random.randint(2, size=(1, 10))
+            _input_data: np.random.randint(vocab_size, size=(1, 10))
         }
+
+        print(input_feed)
 
         _last_input = sess.run(inputs[-1], feed_dict=input_feed)
         _last_output = sess.run(last_output, feed_dict=input_feed)
