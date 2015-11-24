@@ -30,7 +30,7 @@ def main(argv):
     num_units = 12
     input_size = 4
 
-    batch_size = 8
+    batch_size = 32
     seq_len = 100
     num_epochs = 1024
 
@@ -60,6 +60,10 @@ def main(argv):
         for epoch in range(num_epochs):
 
             temp_x, y = gen_data(50, seq_len, batch_size, input_size)
+
+            print(temp_x.shape)
+
+
             x = []
             for i in range(seq_len):
                 x.append(temp_x[:, i, :])

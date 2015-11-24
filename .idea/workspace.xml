@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="14c3a980-85f8-4dab-b6a8-bc5580c73290" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/rnn_ex1.py" afterPath="$PROJECT_DIR$/rnn_ex1.py" />
     </list>
     <ignored path="tensorflow-playground.iws" />
@@ -27,8 +26,8 @@
       <file leaf-file-name="rnn_ex1.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/rnn_ex1.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.52577317">
-              <caret line="50" column="67" selection-start-line="50" selection-start-column="67" selection-end-line="50" selection-end-column="67" />
+            <state vertical-scroll-proportion="1.3814433">
+              <caret line="67" column="30" selection-start-line="67" selection-start-column="30" selection-end-line="67" selection-end-column="30" />
               <folding>
                 <element signature="e#46#69#0" expanded="true" />
               </folding>
@@ -148,8 +147,8 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/rnn_ex1.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.52577317">
-          <caret line="50" column="67" selection-start-line="50" selection-start-column="67" selection-end-line="50" selection-end-column="67" />
+        <state vertical-scroll-proportion="1.3814433">
+          <caret line="67" column="30" selection-start-line="67" selection-start-column="30" selection-end-line="67" selection-end-column="30" />
           <folding>
             <element signature="e#46#69#0" expanded="true" />
           </folding>
