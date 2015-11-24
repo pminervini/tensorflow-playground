@@ -7,6 +7,8 @@ import numpy as np
 from tensorflow.models.rnn import rnn_cell
 from tensorflow.models.rnn import rnn
 
+from keras.preprocessing import sequence, text
+
 import random
 import sys
 
@@ -19,16 +21,42 @@ def read_lines(path):
 
 def main(argv):
 
-    random.seed(1)
-    np.random.seed(1)
-
     batch_size = 1
-    num_steps = 10
+    num_steps = 20
     hidden_size = 8
     embedding_size = 20
     vocab_size = 16
 
-    num_epochs = 1024
+    num_epochs = 2 ** 16
+
+    random.seed(1)
+    np.random.seed(1)
+
+    print('Importing Tweets ..')
+
+    positive_tweets = read_lines('data/spc/positive-train')[:1000]
+    negative_tweets = read_lines('data/spc/positive-train')[:1000]
+
+    tweets = positive_tweets + negative_tweets
+    labels = [1] * len(positive_tweets) + [0] * len(negative_tweets)
+
+    print('Shuffling the training examples ..')
+
+    tweet_label_pairs = list(zip(tweets, labels))
+    random.shuffle(tweet_label_pairs)
+    tweets, labels = [e[0] for e in tweet_label_pairs], [e[1] for e in tweet_label_pairs]
+
+    print('Tokenizing the text ..')
+
+    tokenizer = text.Tokenizer(nb_words=vocab_size)
+    tokenizer.fit_on_texts(tweets)
+    sequences = [seq for seq in tokenizer.texts_to_sequences_generator(tweets)]
+
+    X = sequence.pad_sequences(sequences, maxlen=num_steps)
+
+    print(X.shape)
+
+    print('Building the model ..')
 
     input_data = tf.placeholder(tf.int32, [batch_size, num_steps])
     targets = tf.placeholder(tf.float32, [batch_size])
@@ -55,7 +83,7 @@ def main(argv):
 
     y = tf.nn.sigmoid(tf.matmul(last_output, W) + b)
 
-    cost = tf.reduce_mean(tf.abs(y - targets))
+    cost = tf.reduce_mean(tf.pow(y - targets, 2))
     train_op = tf.train.AdamOptimizer(0.001).minimize(cost)
 
     init = tf.initialize_all_variables()
@@ -64,18 +92,12 @@ def main(argv):
         sess.run(init)
 
         for epoch in range(num_epochs):
-
-            _sentence = np.random.randint(vocab_size, size=(1, 10))
-
-            input_feed = {
-                input_data: _sentence
-            }
-            _y = sess.run(y, feed_dict=input_feed)
-
-            _target = np.random.random_sample(1)
+            _sentence_id = np.random.randint(X.shape[0])
+            _sentence = [X[_sentence_id, :]]
+            _target = [labels[_sentence_id]]
 
             input_feed = {
-                input_data: np.random.randint(vocab_size, size=(1, 10)),
+                input_data: _sentence,
                 targets: _target
             }
 

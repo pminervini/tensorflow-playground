@@ -26,8 +26,8 @@
       <file leaf-file-name="spc_rnn_ex1.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/spc_rnn_ex1.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.58762884">
-              <caret line="74" column="12" selection-start-line="74" selection-start-column="12" selection-end-line="74" selection-end-column="12" />
+            <state vertical-scroll-proportion="0.5979381">
+              <caret line="29" column="24" selection-start-line="29" selection-start-column="24" selection-end-line="29" selection-end-column="24" />
               <folding>
                 <element signature="e#46#69#0" expanded="true" />
               </folding>
@@ -315,8 +315,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/spc_rnn_ex1.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.58762884">
-          <caret line="74" column="12" selection-start-line="74" selection-start-column="12" selection-end-line="74" selection-end-column="12" />
+        <state vertical-scroll-proportion="0.5979381">
+          <caret line="29" column="24" selection-start-line="29" selection-start-column="24" selection-end-line="29" selection-end-column="24" />
           <folding>
             <element signature="e#46#69#0" expanded="true" />
           </folding>
