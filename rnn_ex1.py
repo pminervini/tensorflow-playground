@@ -30,7 +30,7 @@ def main(argv):
     num_units = 12
     input_size = 4
 
-    batch_size = 128
+    batch_size = 8
     seq_len = 100
     num_epochs = 1024
 
@@ -49,11 +49,6 @@ def main(argv):
 
     cost = tf.reduce_mean(tf.pow(outputs3-result, 2))
     train_op = tf.train.RMSPropOptimizer(0.005, 0.2).minimize(cost)
-
-    temp_x, y_val = gen_data(50, seq_len, batch_size, input_size)
-    x_val = []
-    for i in range(seq_len):
-        x_val.append(temp_x[:, i, :])
 
     print('Executing the model ..')
 
@@ -75,8 +70,8 @@ def main(argv):
             print('Updating the parameters ..')
             sess.run(train_op, feed_dict=temp_dict)
 
-            val_dict = {inputs[i]: x_val[i] for i in range(seq_len)}
-            val_dict.update({result: y_val})
+            val_dict = {inputs[i]: x[i] for i in range(seq_len)}
+            val_dict.update({result: y})
             c_val = sess.run(cost, feed_dict=val_dict)
             print('Validation cost: {}, on Epoch {}'.format(c_val, epoch))
 
