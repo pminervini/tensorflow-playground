@@ -20,14 +20,14 @@ def main(argv):
 
     batch_size = 1
     num_steps = 10
-    size = 8
+    hidden_size = 8
     embedding_size = 20
     vocab_size = 16
 
     _input_data = tf.placeholder(tf.int32, [batch_size, num_steps])
     _targets = tf.placeholder(tf.int32, [batch_size])
 
-    lstm_cell = rnn_cell.BasicLSTMCell(size, forget_bias=0.0)
+    lstm_cell = rnn_cell.BasicLSTMCell(hidden_size, forget_bias=0.0)
     cell = lstm_cell
 
     _initial_state = cell.zero_state(batch_size, tf.float32)
@@ -46,6 +46,12 @@ def main(argv):
     last_output = outputs[-1]
     last_state = states[-1]
 
+    W = tf.Variable(tf.zeros([hidden_size, 1]))
+    b = tf.Variable(tf.zeros([1]))
+
+    y = tf.nn.sigmoid(tf.matmul(last_output, W) + b)
+
+
     init = tf.initialize_all_variables()
 
     with tf.Session() as sess:
@@ -58,11 +64,12 @@ def main(argv):
         _last_input = sess.run(inputs[-1], feed_dict=input_feed)
         _last_output = sess.run(last_output, feed_dict=input_feed)
         _last_state = sess.run(last_state, feed_dict=input_feed)
+        _y = sess.run(y, feed_dict=input_feed)
 
         print('Last input: ', _last_input.shape)
         print('Last output: ', _last_output.shape)
         print('Last state: ', _last_state.shape)
-
+        print('y: ', _y)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
