@@ -21,11 +21,11 @@ def read_lines(path):
 
 def main(argv):
 
-    batch_size = 1
+    batch_size = 8
     num_steps = 20
-    hidden_size = 8
+    hidden_size = 64
     embedding_size = 20
-    vocab_size = 16
+    vocab_size = 100
 
     num_epochs = 2 ** 16
 
@@ -35,7 +35,7 @@ def main(argv):
     print('Importing Tweets ..')
 
     positive_tweets = read_lines('data/spc/positive-train')[:1000]
-    negative_tweets = read_lines('data/spc/positive-train')[:1000]
+    negative_tweets = read_lines('data/spc/negative-train')[:1000]
 
     tweets = positive_tweets + negative_tweets
     labels = [1] * len(positive_tweets) + [0] * len(negative_tweets)
@@ -53,8 +53,6 @@ def main(argv):
     sequences = [seq for seq in tokenizer.texts_to_sequences_generator(tweets)]
 
     X = sequence.pad_sequences(sequences, maxlen=num_steps)
-
-    print(X.shape)
 
     print('Building the model ..')
 
@@ -92,20 +90,27 @@ def main(argv):
         sess.run(init)
 
         for epoch in range(num_epochs):
-            _sentence_id = np.random.randint(X.shape[0])
-            _sentence = [X[_sentence_id, :]]
-            _target = [labels[_sentence_id]]
+            epoch_cost = 0.0
 
-            input_feed = {
-                input_data: _sentence,
-                targets: _target
-            }
+            indices = np.random.permutation(X.shape[0])
+            _X = X[indices, :]
+            _labels = [labels[index] for index in indices]
 
-            c_val = sess.run(cost, feed_dict=input_feed)
+            for i in range(0, X.shape[0], batch_size):
+                _sentence = _X[i:i + batch_size, :]
+                _target = [_labels[j] for j in range(i, i + batch_size)]
 
-            print('Validation cost: {}, on Epoch {}'.format(c_val, epoch))
+                input_feed = {
+                    input_data: _sentence,
+                    targets: _target
+                }
 
-            sess.run(train_op, feed_dict=input_feed)
+                c_val = sess.run(cost, feed_dict=input_feed)
+                epoch_cost += c_val
+
+                sess.run(train_op, feed_dict=input_feed)
+
+            print('Validation cost: {}, on Epoch {}'.format(epoch_cost, epoch))
 
 if __name__ == '__main__':
     main(sys.argv[1:])
