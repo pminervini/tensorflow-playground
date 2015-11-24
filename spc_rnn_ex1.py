@@ -10,74 +10,58 @@ from tensorflow.models.rnn import rnn
 import sys
 
 
-def gen_data(min_length=50, max_length=55, n_batch=5, input_size=8):
-    X = np.concatenate([np.random.uniform(size=(n_batch, max_length, input_size - 1)),
-                        np.zeros((n_batch, max_length, 1))], axis=-1)
-    y = np.zeros((n_batch,))
-
-    for n in range(n_batch):
-        length = np.random.randint(min_length, max_length)
-        X[n, length:, 0] = 0
-        X[n, np.random.randint(length/2-1), 1] = 1
-        X[n, np.random.randint(length/2, length), 1] = 1
-
-        y[n] = np.sum(X[n, :, 0] * X[n, :, 1])
-
-    return X, y
+def read_lines(path):
+    with open(path, 'r') as f:
+        lines = f.readlines()
+    return lines
 
 
 def main(argv):
-    num_units = 12
-    input_size = 4
 
-    batch_size = 32
-    seq_len = 100
-    num_epochs = 1024
+    batch_size = 1
+    num_steps = 10
+    size = 8
+    embedding_size = 20
+    vocab_size = 16
 
-    print('Building the model ..')
+    _input_data = tf.placeholder(tf.int32, [batch_size, num_steps])
+    _targets = tf.placeholder(tf.int32, [batch_size])
 
-    cell = rnn_cell.BasicLSTMCell(num_units)
-    inputs = [tf.placeholder(tf.float32, shape=[batch_size, input_size]) for _ in range(seq_len)]
-    result = tf.placeholder(tf.float32, shape=[batch_size])
+    lstm_cell = rnn_cell.BasicLSTMCell(size, forget_bias=0.0)
+    cell = lstm_cell
 
-    outputs, states = rnn.rnn(cell, inputs, dtype=tf.float32)
+    _initial_state = cell.zero_state(batch_size, tf.float32)
 
-    W_o = tf.Variable(tf.random_normal([num_units, 1], stddev=0.01))
-    b_o = tf.Variable(tf.random_normal([1], stddev=0.01))
+    embedding = tf.get_variable('embedding', [vocab_size, embedding_size])
 
-    outputs3 = tf.matmul(outputs[-1], W_o) + b_o
+    inputs = tf.split(
+        1,
+        num_steps,
+        tf.nn.embedding_lookup(embedding, _input_data)
+    )
 
-    cost = tf.reduce_mean(tf.pow(outputs3-result, 2))
-    train_op = tf.train.RMSPropOptimizer(0.005, 0.2).minimize(cost)
+    inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
-    print('Executing the model ..')
+    outputs, states = rnn.rnn(cell, inputs, initial_state=_initial_state)
+    last_output = outputs[-1]
+    last_state = states[-1]
 
     init = tf.initialize_all_variables()
 
     with tf.Session() as sess:
         sess.run(init)
 
-        for epoch in range(num_epochs):
+        input_feed = {
+            _input_data: np.random.randint(2, size=(1, 10))
+        }
 
-            temp_x, y = gen_data(50, seq_len, batch_size, input_size)
+        _last_input = sess.run(inputs[-1], feed_dict=input_feed)
+        _last_output = sess.run(last_output, feed_dict=input_feed)
+        _last_state = sess.run(last_state, feed_dict=input_feed)
 
-            print(temp_x.shape)
-
-
-            x = []
-            for i in range(seq_len):
-                x.append(temp_x[:, i, :])
-
-            temp_dict = {inputs[i]: x[i] for i in range(seq_len)}
-            temp_dict.update({result: y})
-
-            print('Updating the parameters ..')
-            sess.run(train_op, feed_dict=temp_dict)
-
-            val_dict = {inputs[i]: x[i] for i in range(seq_len)}
-            val_dict.update({result: y})
-            c_val = sess.run(cost, feed_dict=val_dict)
-            print('Validation cost: {}, on Epoch {}'.format(c_val, epoch))
+        print('Last input: ', _last_input.shape)
+        print('Last output: ', _last_output.shape)
+        print('Last state: ', _last_state.shape)
 
 
 if __name__ == '__main__':
