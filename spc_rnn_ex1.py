@@ -28,52 +28,62 @@ def main(argv):
     embedding_size = 20
     vocab_size = 16
 
-    _input_data = tf.placeholder(tf.int32, [batch_size, num_steps])
-    _targets = tf.placeholder(tf.int32, [batch_size])
+    num_epochs = 1024
+
+    input_data = tf.placeholder(tf.int32, [batch_size, num_steps])
+    targets = tf.placeholder(tf.float32, [batch_size])
 
     cell = rnn_cell.BasicLSTMCell(hidden_size, forget_bias=0.0)
 
-    _initial_state = cell.zero_state(batch_size, tf.float32)
+    initial_state = cell.zero_state(batch_size, tf.float32)
 
     embedding = tf.get_variable('embedding', [vocab_size, embedding_size])
 
     inputs = tf.split(
         1,
         num_steps,
-        tf.nn.embedding_lookup(embedding, _input_data)
+        tf.nn.embedding_lookup(embedding, input_data)
     )
 
     inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
-    outputs, states = rnn.rnn(cell, inputs, initial_state=_initial_state)
+    outputs, states = rnn.rnn(cell, inputs, initial_state=initial_state)
     last_output = outputs[-1]
-    last_state = states[-1]
 
     W = tf.Variable(tf.zeros([hidden_size, 1]))
     b = tf.Variable(tf.zeros([1]))
 
     y = tf.nn.sigmoid(tf.matmul(last_output, W) + b)
 
+    cost = tf.reduce_mean(tf.abs(y - targets))
+    train_op = tf.train.AdamOptimizer(0.001).minimize(cost)
+
     init = tf.initialize_all_variables()
 
     with tf.Session() as sess:
         sess.run(init)
 
-        input_feed = {
-            _input_data: np.random.randint(vocab_size, size=(1, 10))
-        }
+        for epoch in range(num_epochs):
 
-        print(input_feed)
+            _sentence = np.random.randint(vocab_size, size=(1, 10))
 
-        _last_input = sess.run(inputs[-1], feed_dict=input_feed)
-        _last_output = sess.run(last_output, feed_dict=input_feed)
-        _last_state = sess.run(last_state, feed_dict=input_feed)
-        _y = sess.run(y, feed_dict=input_feed)
+            input_feed = {
+                input_data: _sentence
+            }
+            _y = sess.run(y, feed_dict=input_feed)
 
-        print('Last input: ', _last_input.shape)
-        print('Last output: ', _last_output.shape)
-        print('Last state: ', _last_state.shape)
-        print('y: ', _y)
+            _target = np.random.random_sample(1)
+
+            input_feed = {
+                input_data: np.random.randint(vocab_size, size=(1, 10)),
+                targets: _target
+            }
+
+            c_val = sess.run(cost, feed_dict=input_feed)
+
+            print('Validation cost: {}, on Epoch {}'.format(c_val, epoch))
+
+            sess.run(train_op, feed_dict=input_feed)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
